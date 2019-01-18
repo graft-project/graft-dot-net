@@ -1,0 +1,27 @@
+﻿using Newtonsoft.Json;
+
+namespace Graft.DAPI.Entities
+{
+    public class DapiRequest<T>
+    {
+        [JsonProperty(PropertyName = "jsonrpc")]
+        public string Jsonrpc { get; set; } 
+
+        [JsonProperty(PropertyName = "id")]
+        public string Id { get; set; }
+
+        [JsonProperty(PropertyName = "method")]
+        public string Method { get; set; }
+
+        [JsonProperty(PropertyName = "params")]
+        public T Parameters { get; set; }
+
+        public DapiRequest(string method, T parameters)
+        {
+            Jsonrpc = "2.0";
+            Id = "0";
+            Method = method;
+            Parameters = parameters;
+        }
+    }
+}
