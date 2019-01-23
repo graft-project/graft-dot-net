@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System;
 
 namespace Graft.Infrastructure
 {
@@ -43,6 +44,28 @@ namespace Graft.Infrastructure
             if (str == null)
                 return false;
             return str.Contains(value);
+        }
+
+        public static byte[] HexStringToBytes(this string hex)
+        {
+            if (hex == null) return null;
+            if (hex.Length == 0) return new byte[0];
+
+            int l = hex.Length / 2;
+            var b = new byte[l];
+            for (int i = 0; i < l; ++i)
+            {
+                b[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
+            }
+            return b;
+        }
+    }
+
+    public static class ByteArrayExtensions
+    {
+        public static bool ByteArrayCompare(this byte[] a1, ReadOnlySpan<byte> a2)
+        {
+            return ((ReadOnlySpan<byte>)a1).SequenceEqual(a2);
         }
     }
 }
