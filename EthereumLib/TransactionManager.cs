@@ -1,5 +1,6 @@
 ﻿using EthereumLib.Models;
 using Graft.Infrastructure.AccountPool;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -17,11 +18,14 @@ namespace EthereumLib
 
         private const decimal drainLimit = 0.001M;
         private const int AccountUnlockDurationInSeconds = 60;
-        private bool isTestnet;
-        private string defaultAccountPassword;
-        private string gethNodeAddress;
-        private string drainAddress;
-        private decimal drainValue;
+
+        private readonly IAccountPool addressPool;
+        private readonly ILogger logger;
+        private readonly bool isTestnet;
+        private readonly string defaultAccountPassword;
+        private readonly string gethNodeAddress;
+        private readonly string drainAddress;
+        private readonly decimal drainValue;
 
         private string TransactionListUri
         {
@@ -31,10 +35,14 @@ namespace EthereumLib
             }
         }
 
-        private IAccountPool addressPool;
 
-        public TransactionManager(IAccountPool addressPool, bool isTestnet, string defaultAccountPassword, string gethNodeAddress, string drainAddress, decimal drainValue)
+        public TransactionManager(ILoggerFactory loggerFactory, 
+            IAccountPool addressPool, bool isTestnet, 
+            string defaultAccountPassword, string gethNodeAddress, 
+            string drainAddress, decimal drainValue)
         {
+            logger = loggerFactory.CreateLogger<TransactionManager>();
+
             this.isTestnet = isTestnet;
             this.addressPool = addressPool;
             this.defaultAccountPassword = defaultAccountPassword;
@@ -76,7 +84,7 @@ namespace EthereumLib
                             Balance = 0,
                             CurrencyName = CurrencyCode,
                             IsProcessed = true,
-                            LastTransactionHash = String.Empty
+                            LastTransactionHash = string.Empty
                         };
 
                         await addressPool.WriteNewAccount(result);
@@ -90,12 +98,12 @@ namespace EthereumLib
                         break;
                     }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    logger.LogError(ex, "Failed to get Ethereum address");
                 }
 
-                await Task.Delay(new TimeSpan(0, 0, 0, 0, delayMS));
+                await Task.Delay(delayMS);
             }
 
             return result;
@@ -144,7 +152,6 @@ namespace EthereumLib
 
             if (poolItem.Balance > drainValue && poolItem.Balance > drainLimit)
             {
-
                 try
                 {
                     var web3 = new Nethereum.Web3.Web3(gethNodeAddress);
@@ -156,11 +163,10 @@ namespace EthereumLib
                     await web3.TransactionManager.SendTransactionAsync(poolItem.Address, drainAddress, sendBalance).ConfigureAwait(false);
 
                     await addressPool.ClearBalance(poolItem.Address).ConfigureAwait(false);
-
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    logger.LogError(ex, "Failed to DrainPoolItem");
                 }
             }
         }
@@ -186,12 +192,12 @@ namespace EthereumLib
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    logger.LogError(ex, "Failed to GetTransactionsByAddressEtherscan");
                 }
 
-                await Task.Delay(new TimeSpan(0, 0, 0, 0, delayMS));
+                await Task.Delay(delayMS);
             }
 
             return result;
@@ -209,12 +215,12 @@ namespace EthereumLib
                     result = await web3.Personal.NewAccount.SendRequestAsync(defaultAccountPassword);
                     break;
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    logger.LogError(ex, "Failed to CreateNewAccount");
                 }
 
-                await Task.Delay(new TimeSpan(0, 0, 5));
+                await Task.Delay(5000);
             }
 
             return result;
