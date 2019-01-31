@@ -98,23 +98,31 @@ namespace GraftLib
         {
             while (true)
             {
-                var transactions = await databaseWorker.GetNewTransactions();
-
-                if (transactions != null)
+                try
                 {
-                    transactions = await ValidateTransactions(transactions);
+                    var transactions = await databaseWorker.GetNewTransactions();
 
-                    if (transactions.Any())
+                    if (transactions != null)
                     {
-                        logger.LogInformation($"Sending {transactions.Count()} transactions.");
+                        transactions = await ValidateTransactions(transactions);
 
-                        var txHash = await SendTransactions(transactions);
+                        if (transactions.Any())
+                        {
+                            logger.LogInformation($"Sending {transactions.Count()} transactions.");
 
-                        await databaseWorker.SetTransactionStatus(transactions.Select(x => x.Id), txHash == null, txHash);
+                            var txHash = await SendTransactions(transactions);
+
+                            await databaseWorker.SetTransactionStatus(transactions.Select(x => x.Id), txHash == null, txHash);
+                        }
                     }
-                }
 
-                await Task.Delay(configuration.TransactionWaitTime);
+                    await Task.Delay(configuration.TransactionWaitTime);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error in TransactionManager");
+                    await Task.Delay(configuration.TransactionWaitTime);
+                }
             }
         }
     }
