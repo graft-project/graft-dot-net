@@ -28,9 +28,8 @@ namespace GraftLib
             this.wallet = wallet;
             this.databaseWorker = databaseWorker;
 
-            transactionQWorker = Task.Factory.StartNew(TaskBody);
-
             logger = loggerFactory.CreateLogger<TransactionManager>();
+            transactionQWorker = Task.Factory.StartNew(TaskBody);
         }
 
         private async Task<IEnumerable<TransactionRequest>> ValidateTransactions(IEnumerable<TransactionRequest> transactions)
