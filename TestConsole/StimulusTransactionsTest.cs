@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using WalletRpc;
 
 
@@ -15,8 +16,12 @@ namespace TestConsole
         {
             try
             {
+
+
+
                 //var wallet = new Wallet("http://54.84.187.74:29982/", "", "");
-                var wallet = new Wallet("http://100.24.50.163:28682/", "", "");
+                var wallet = new Wallet("http://54.84.187.74:29817/", "", "");
+                //var wallet = new Wallet("http://100.24.50.163:28682/", "", "");
                 var address = await wallet.GetAddress();
                 var balance = await wallet.GetBalance();
                 Console.WriteLine($"Wallet {address} \nbalance: {GraftConvert.FromAtomicUnits(balance.Balance)}\nUnlocked balance: {GraftConvert.FromAtomicUnits(balance.UnlockedBalance)}");
@@ -24,13 +29,17 @@ namespace TestConsole
 
                 // params
                 ulong amount = GraftConvert.ToAtomicUnits(1.23M);
-                //string merchantWalletAddress = "F6YZFhK6MiEHwNYmXHZkRHeX7xCkxfutEUY6QT6541MFNPWPzia3E5NgY7A92mHSc1Evhu7ehdyrK92tC7UW5LKF7pzAcmF";
-                string merchantWalletAddress = "FDL3iHduJBGNZGgem6DF6hRt5vGEiBvLfVa4ZVwJjxLyEeLjcUvznMMWnPws3K3N4nbrsjskNLTGePQGXRo3FeqpEG7YwDe";
+                
+                string merchantWalletAddress = "FAPnEQ1ev195ntzFnZGtHWDocyDaDPxUyV9SLp1e4seE1QDewvnMotsUwBYLFU5RsDBnJqpQFSsYjZUfP7g1urucLoiSPCv";
                 string paymentId = Guid.NewGuid().ToString();
 
 
-                //var dapi = new GraftDapi("http://18.214.197.224:28690/dapi/v2.0/");
-                var dapi = new GraftDapi("http://100.24.50.163:28690/dapi/v2.0/");
+                //18.214.197.224  rta - alpha1
+                //18.214.197.50   rta - alpha2
+                //35.169.179.171  rta - alpha3
+                //34.192.115.160  rta - alpha4
+                var dapi = new GraftDapi("http://18.214.197.224:28690/dapi/v2.0/");
+                //var dapi = new GraftDapi("http://100.24.50.163:28690/dapi/v2.0/");
 
 
                 // sale -----------------------------------------
@@ -43,6 +52,7 @@ namespace TestConsole
                 };
 
                 var saleResult = await dapi.Sale(dapiParams);
+                Console.WriteLine($">>> Sale result: {saleResult.PaymentId}, {saleResult.BlockNumber}");
 
 
                 // sale_status -----------------------------------------
@@ -94,7 +104,8 @@ namespace TestConsole
 
                 var transferResult = await wallet.TransferRta(transferParams);
                 json = JsonConvert.SerializeObject(transferResult, Formatting.Indented);
-                Console.WriteLine($"Transfer Result:\n{json}");
+                //Console.WriteLine($"Transfer Result:\n{json}");
+                Console.WriteLine($"Transfer Result: {transferResult.Amount}");
 
 
                 // DAPI pay
@@ -114,12 +125,22 @@ namespace TestConsole
                 json = JsonConvert.SerializeObject(payResult, Formatting.Indented);
                 Console.WriteLine($"Pay Result:\n{json}");
 
+
+                while (true)
+                {
+                    saleStatusResult = await dapi.GetSaleStatus(dapiStatusParams);
+                    Console.WriteLine($"Sale status: {saleStatusResult.Status}");
+                    await Task.Delay(1000);
+
+                    //saleDetailsResult = await dapi.SaleDetails(dapiSaleDetailsParams);
+                    //json = JsonConvert.SerializeObject(saleDetailsResult, Formatting.Indented);
+                    //Console.WriteLine($"Sale Details:\n{json}");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-
         }
 
     }

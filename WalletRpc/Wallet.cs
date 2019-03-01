@@ -55,8 +55,9 @@ namespace WalletRpc
                 var json = JsonConvert.SerializeObject(request);
                 response = await client.PostAsync("json_rpc", new StringContent(json));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 throw new ApiException(ErrorCode.NoConnectionToRpc);
             }
 
