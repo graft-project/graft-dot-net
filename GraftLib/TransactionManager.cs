@@ -11,7 +11,7 @@ namespace GraftLib
 {
     public class TransactionManager
     {
-        private Task transactionQWorker;
+        private readonly Task transactionQWorker;
 
         private GraftServiceConfiguration configuration;
         private IWallet wallet;

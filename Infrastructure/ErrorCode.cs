@@ -132,5 +132,11 @@ namespace Graft.Infrastructure
 
         [Description("Virtual Terminal not found")]
         VirtualTerminalNotFound = 44,
+
+        [Description("Payment already made")]
+        PaymentAlreadyMade = 45,
+
+        [Description("Currency pair '{0}' is not supported")]
+        CurrencyPairNotSupported = 46,
     }
 }

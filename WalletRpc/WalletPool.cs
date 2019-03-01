@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,11 +8,17 @@ namespace WalletRpc
     public class WalletPool
     {
         List<Wallet> _wallets = new List<Wallet>();
+        readonly WalletPoolConfig _settings;
+
         public IEnumerable<Wallet> Wallets => _wallets;
 
-        public WalletPool(IEnumerable<WalletConfig> wallets)
+        public WalletPool(IConfiguration configuration)
         {
-            foreach (var item in wallets)
+            _settings = configuration
+                .GetSection("WalletPool")
+                .Get<WalletPoolConfig>();
+
+            foreach (var item in _settings.Wallets)
             {
                 var wallet = new Wallet(item.Url, "", "");
                 _wallets.Add(wallet);
@@ -42,7 +49,7 @@ namespace WalletRpc
         public Wallet GetPayWallet(decimal amount)
         {
             return _wallets.OrderBy(w => w.LastPayTime)
-                .Where(w => w.UnlockedBalance >= amount)
+                //.Where(w => w.UnlockedBalance >= amount)
                 .FirstOrDefault();
         }
 

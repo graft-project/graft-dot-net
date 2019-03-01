@@ -1,5 +1,6 @@
 ﻿using Graft.DAPI.Entities;
 using Graft.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
@@ -12,16 +13,42 @@ namespace Graft.DAPI
     {
         HttpClient client;
 
-        public GraftDapi(string url)
+        public GraftDapi(IConfiguration configuration)
         {
+            var settings = configuration
+                .GetSection("DAPI")
+                .Get<DapiConfiguration>();
+
             client = new HttpClient()
             {
-                BaseAddress = new Uri(url)
+                BaseAddress = new Uri(settings.Url)
             };
 
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
+
+        public static PaymentStatus DapiStatusToPaymentStatus(DapiSaleStatus dapiStatus)
+        {
+            switch (dapiStatus)
+            {
+                case DapiSaleStatus.Waiting:
+                    return PaymentStatus.Waiting;
+                case DapiSaleStatus.InProgress:
+                    return PaymentStatus.InProgress;
+                case DapiSaleStatus.Success:
+                    return PaymentStatus.Received;
+                case DapiSaleStatus.Fail:
+                    return PaymentStatus.Fail;
+                case DapiSaleStatus.RejectedByWallet:
+                    return PaymentStatus.RejectedByWallet;
+                case DapiSaleStatus.RejectedByPOS:
+                    return PaymentStatus.RejectedByPOS;
+                default:
+                    throw new InvalidCastException();
+            }
         }
 
         public Task<DapiSaleResult> Sale(DapiSaleParams parameters)

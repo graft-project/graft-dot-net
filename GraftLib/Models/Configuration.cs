@@ -7,6 +7,7 @@ namespace GraftLib.Models
     public class GraftServiceConfiguration
     {
         public string ServerUrl { get; set; }
+        public string DapiUrl { get; set; }
         public string User { get; set; }
         public string Password { get; set; }
 
