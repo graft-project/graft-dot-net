@@ -5,8 +5,8 @@ namespace Graft.Infrastructure.Broker
 {
     public interface IExchangeBroker : IWatchableService
     {
-        Task<BrokerExchangeResult> Sale(BrokerExchangeParams parameters);
-        Task<BrokerExchangeResult> GetSaleStatus(BrokerExchangeStatusParams parameters);
+        Task<BrokerExchangeResult> Exchange(BrokerExchangeParams parameters);
+        Task<BrokerExchangeResult> ExchangeStatus(BrokerExchangeStatusParams parameters);
         Task<BrokerParams> GetParams();
     }
 }

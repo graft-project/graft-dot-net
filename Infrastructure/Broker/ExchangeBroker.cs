@@ -48,12 +48,12 @@ namespace Graft.Infrastructure.Broker
         //    return MeasurePost<BrokerSaleStatusResult, BrokerSaleStatusParams>("SaleStatus", parameters);
         //}
 
-        public Task<BrokerExchangeResult> Sale(BrokerExchangeParams parameters)
+        public Task<BrokerExchangeResult> Exchange(BrokerExchangeParams parameters)
         {
             return MeasurePost<BrokerExchangeResult, BrokerExchangeParams>("Exchange", parameters);
         }
 
-        public Task<BrokerExchangeResult> GetSaleStatus(BrokerExchangeStatusParams parameters)
+        public Task<BrokerExchangeResult> ExchangeStatus(BrokerExchangeStatusParams parameters)
         {
             return MeasurePost<BrokerExchangeResult, BrokerExchangeStatusParams>("ExchangeStatus", parameters);
         }

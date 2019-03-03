@@ -3,6 +3,8 @@
     // only one amount must be set, all other must be 0
     public class BrokerExchangeParams
     {
+        public string ExchangeId { get; set; }
+
         // fiat equivalent. For example - I want to sell BTC in equivalent to 1$
         // or buy GRFT in equivalent to 1$
         public string FiatCurrency { get; set; }
