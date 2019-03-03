@@ -19,7 +19,10 @@ namespace Graft.Infrastructure.Broker
         public decimal ExchangeBrokerFeeRate { get; set; } // 0.005 (0.5%)
         public decimal ExchangeBrokerFeeAmount { get; set; } // fee amount
 
-        public string PayWalletAddress { get; set; }
+        public string PayWalletAddress { get; set; } // addres to pay (BTC)
+        public string GraftWalletAddress { get; set; }
+        public string GraftPaymentId { get; set; }
+        public int GraftBlockNumber { get; set; }
 
         public List<EventItem> ProcessingEvents { get; set; }
     }
