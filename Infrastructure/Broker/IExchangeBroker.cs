@@ -7,6 +7,10 @@ namespace Graft.Infrastructure.Broker
     {
         Task<BrokerExchangeResult> Exchange(BrokerExchangeParams parameters);
         Task<BrokerExchangeResult> ExchangeStatus(BrokerExchangeStatusParams parameters);
+
+        Task<BrokerExchangeResult> ExchangeToStable(BrokerExchangeToStableParams parameters);
+        Task<BrokerExchangeResult> ExchangeToStableStatus(BrokerExchangeStatusParams parameters);
+
         Task<BrokerParams> GetParams();
     }
 }
