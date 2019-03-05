@@ -21,7 +21,7 @@ namespace Graft.Infrastructure
     {
         public static ulong ToAtomicUnits(decimal amount)
         {
-            return (ulong)(amount * 10_000_000_000);
+            return (ulong)Math.Round(amount * 10_000_000_000);
         }
 
         public static decimal FromAtomicUnits(ulong amount)

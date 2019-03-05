@@ -11,7 +11,7 @@ namespace Graft.DAPI
 {
     public class GraftDapi
     {
-        HttpClient client;
+        readonly HttpClient client;
 
         public GraftDapi(IConfiguration configuration)
         {
@@ -29,6 +29,17 @@ namespace Graft.DAPI
                 new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
+        public GraftDapi(string url)
+        {
+            client = new HttpClient()
+            {
+                BaseAddress = new Uri(url)
+            };
+
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+        }
 
         public static PaymentStatus DapiStatusToPaymentStatus(DapiSaleStatus dapiStatus)
         {

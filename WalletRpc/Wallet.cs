@@ -22,7 +22,7 @@ namespace WalletRpc
         public decimal UnlockedBalance => GraftConvert.FromAtomicUnits(RawBalance?.UnlockedBalance ?? 0);
 
 
-        public Wallet(string uri, string username, string password)
+        public Wallet(string uri, string username = null, string password = null)
         {
             //var credCache = new CredentialCache
             //{

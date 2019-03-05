@@ -38,15 +38,10 @@ namespace Graft.Infrastructure.Broker
             Parameters["URL"] = _settings.Url;
         }
 
-        //public Task<BrokerSaleResult> Sale(BrokerSaleParams parameters)
-        //{
-        //    return MeasurePost<BrokerSaleResult, BrokerSaleParams>("Sale", parameters);
-        //}
-
-        //public Task<BrokerSaleStatusResult> GetSaleStatus(BrokerSaleStatusParams parameters)
-        //{
-        //    return MeasurePost<BrokerSaleStatusResult, BrokerSaleStatusParams>("SaleStatus", parameters);
-        //}
+        public Task<BrokerExchangeResult> CalcExchange(BrokerExchangeParams parameters)
+        {
+            return MeasurePost<BrokerExchangeResult, BrokerExchangeParams>("CalcExchange", parameters);
+        }
 
         public Task<BrokerExchangeResult> Exchange(BrokerExchangeParams parameters)
         {
