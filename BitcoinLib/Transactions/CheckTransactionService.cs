@@ -3,6 +3,7 @@ using NBitcoin;
 using NBitcoin.RPC;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -17,21 +18,27 @@ namespace BitcoinLib.Transactions
     /// </summary>
     public class CheckTransactionService
     {
-        private const string BlockCypherUrl = "https://api.blockcypher.com/v1/btc/{0}/txs/{1}";
-        private const string BlockCypher_AddressUrl = "https://api.blockcypher.com/v1/btc/{0}/addrs/{1}";
+        const string _BlockCypherUrl = "https://api.blockcypher.com/v1/btc/{0}/txs/{1}";
+        const string _BlockCypher_AddressUrl = "https://api.blockcypher.com/v1/btc/{0}/addrs/{1}";
 
-        private ServiceConfiguration serviceConfiguration;
-        //private const uint RequiredConfirmedCount = 6;
+        readonly HttpClient _client1;
+        readonly HttpClient _client2;
+        readonly ServiceConfiguration _config;
 
         public CheckTransactionService(bool isTestNetwork) 
         {
-            this.serviceConfiguration = isTestNetwork ? ServiceConfiguration.TestNet : ServiceConfiguration.Main;
-        }
+            _config = isTestNetwork ? ServiceConfiguration.TestNet : ServiceConfiguration.Main;
 
-        //public CheckTransactionService(ServiceConfiguration serviceConfiguration)
-        //{
-        //    this.serviceConfiguration = serviceConfiguration;
-        //}
+            _client1 = new HttpClient()
+            {
+                BaseAddress = new Uri("https://api.blockcypher.com/v1/btc/"),
+            };
+
+            _client2 = new HttpClient()
+            {
+                BaseAddress = new Uri(_config.BaseBlockchainComAddress),
+            };
+        }
 
         public async Task<CheckTransactionResult> GetTransactionStatusesByAddress(string address, int tryCount = 2, int delayMS = 1000)
         {
@@ -43,7 +50,7 @@ namespace BitcoinLib.Transactions
             return result.Result;
         }
 
-        private async Task<CheckTransactionResult> GetTransactionStatusesByAddressBlockCypher(string address, int tryCount = 2, int delayMS = 1000)
+        async Task<CheckTransactionResult> GetTransactionStatusesByAddressBlockCypher(string address, int tryCount = 2, int delayMS = 1000)
         {
             CheckTransactionResult result = null;
 
@@ -53,17 +60,17 @@ namespace BitcoinLib.Transactions
                 {
                     AddressResponse transaction = null;
 
-                    var requestUrl = string.Format(BlockCypher_AddressUrl, serviceConfiguration.BlockCypherRootNetwork, address);
+                    //var requestUrl = string.Format(BlockCypher_AddressUrl, serviceConfiguration.BlockCypherRootNetwork, address);
 
-                    using (var client = new HttpClient())
+                    //using (var client = new HttpClient())
+                    //{
+                    var response = await _client1.GetStringAsync($"{_config.BlockCypherRootNetwork}/addrs/{address}");
+
+                    if (!string.IsNullOrEmpty(response))
                     {
-                        var response = await client.GetStringAsync(requestUrl);
-
-                        if (!string.IsNullOrEmpty(response))
-                        {
-                            transaction = AddressResponse.FromJson(response);
-                        }
+                        transaction = AddressResponse.FromJson(response);
                     }
+                    //}
 
                     if (transaction != null)
                     {
@@ -98,12 +105,12 @@ namespace BitcoinLib.Transactions
                         break;
                     }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    Debug.WriteLine(ex.Message);
                 }
 
-                await Task.Delay(new TimeSpan(0, 0, 0, 0, delayMS));
+                await Task.Delay(delayMS);
             }
 
             return result;
@@ -121,20 +128,22 @@ namespace BitcoinLib.Transactions
             {
                 try
                 {
-                    var unconfirmedRequest = $"{serviceConfiguration.BaseBlockchainComAddress}unconfirmed-transactions?format=json";
+                    //var unconfirmedRequest = $"{_config.BaseBlockchainComAddress}unconfirmed-transactions?format=json";
+                    var unconfirmedRequest = $"unconfirmed-transactions?format=json";
 
-                    var requestUrl = $"{serviceConfiguration.BaseBlockchainComAddress}rawaddr/{address}";
+                    //var requestUrl = $"{_config.BaseBlockchainComAddress}rawaddr/{address}";
+                    var requestUrl = $"rawaddr/{address}";
 
-                    using (var client = new HttpClient())
-                    {
-                        var response = await client.GetStringAsync(requestUrl);
+                    //using (var client = new HttpClient())
+                    //{
+                        var response = await _client2.GetStringAsync(requestUrl);
 
                         if (!string.IsNullOrEmpty(response))
                         {
                             transaction = BlockchainNetModels.AddressResponse.FromJson(response);
                         }
 
-                        var unconfirmedResponse = await client.GetStringAsync(unconfirmedRequest);
+                        var unconfirmedResponse = await _client2.GetStringAsync(unconfirmedRequest);
 
                         if (!string.IsNullOrEmpty(unconfirmedResponse))
                         {
@@ -145,7 +154,7 @@ namespace BitcoinLib.Transactions
                                 unconfirmedAddress = unconfirmedTransactions.Txs.FirstOrDefault(x => x.Inputs.Any(y => y.PrevOut.Addr == address) || x.Out.Any(z => z.Addr == address));
                             }
                         }
-                    }
+                    //}
 
                     if (transaction != null)
                     {
@@ -172,12 +181,12 @@ namespace BitcoinLib.Transactions
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    Debug.WriteLine(ex.Message);
                 }
 
-                await Task.Delay(new TimeSpan(0, 0, 0, 0, delayMS));
+                await Task.Delay(delayMS);
             }
 
             return result;
