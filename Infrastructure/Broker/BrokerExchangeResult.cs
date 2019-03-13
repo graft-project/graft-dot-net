@@ -7,6 +7,12 @@ namespace Graft.Infrastructure.Broker
         public string ExchangeId { get; set; }
         public PaymentStatus Status { get; set; }
 
+        public PaymentStatus InTxStatus { get; set; }
+        public string InTxStatusDescription { get; set; }
+
+        public PaymentStatus OutTxStatus { get; set; }
+        public string OutTxStatusDescription { get; set; }
+
         public string SellCurrency { get; set; } // currency (BTC), I want to sell
         public decimal SellAmount { get; set; } // amount BTC, I need to pay
 

@@ -1,12 +1,8 @@
 ﻿using BitcoinLib.Transactions.BlockCypherModels;
-using NBitcoin;
-using NBitcoin.RPC;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BitcoinLib.Transactions
@@ -18,8 +14,8 @@ namespace BitcoinLib.Transactions
     /// </summary>
     public class CheckTransactionService
     {
-        const string _BlockCypherUrl = "https://api.blockcypher.com/v1/btc/{0}/txs/{1}";
-        const string _BlockCypher_AddressUrl = "https://api.blockcypher.com/v1/btc/{0}/addrs/{1}";
+        //const string _BlockCypherUrl = "https://api.blockcypher.com/v1/btc/{0}/txs/{1}";
+        //const string _BlockCypher_AddressUrl = "https://api.blockcypher.com/v1/btc/{0}/addrs/{1}";
 
         readonly HttpClient _client1;
         readonly HttpClient _client2;
@@ -128,33 +124,29 @@ namespace BitcoinLib.Transactions
             {
                 try
                 {
-                    //var unconfirmedRequest = $"{_config.BaseBlockchainComAddress}unconfirmed-transactions?format=json";
                     var unconfirmedRequest = $"unconfirmed-transactions?format=json";
-
-                    //var requestUrl = $"{_config.BaseBlockchainComAddress}rawaddr/{address}";
                     var requestUrl = $"rawaddr/{address}";
 
-                    //using (var client = new HttpClient())
-                    //{
-                        var response = await _client2.GetStringAsync(requestUrl);
+                    var response = await _client2.GetStringAsync(requestUrl);
 
-                        if (!string.IsNullOrEmpty(response))
+                    if (!string.IsNullOrEmpty(response))
+                    {
+                        transaction = BlockchainNetModels.AddressResponse.FromJson(response);
+                    }
+
+                    var unconfirmedResponse = await _client2.GetStringAsync(unconfirmedRequest);
+
+                    if (!string.IsNullOrEmpty(unconfirmedResponse))
+                    {
+                        var unconfirmedTransactions = BlockchainNetModels.UnconfirmedTransactions.FromJson(unconfirmedResponse);
+
+                        if (unconfirmedTransactions != null)
                         {
-                            transaction = BlockchainNetModels.AddressResponse.FromJson(response);
+                            unconfirmedAddress = unconfirmedTransactions.Txs.FirstOrDefault(
+                                x => x.Inputs.Any(y => y.PrevOut?.Addr == address)
+                             || x.Out.Any(z => z.Addr == address));
                         }
-
-                        var unconfirmedResponse = await _client2.GetStringAsync(unconfirmedRequest);
-
-                        if (!string.IsNullOrEmpty(unconfirmedResponse))
-                        {
-                            var unconfirmedTransactions = BlockchainNetModels.UnconfirmedTransactions.FromJson(unconfirmedResponse);
-
-                            if (unconfirmedTransactions != null)
-                            {
-                                unconfirmedAddress = unconfirmedTransactions.Txs.FirstOrDefault(x => x.Inputs.Any(y => y.PrevOut.Addr == address) || x.Out.Any(z => z.Addr == address));
-                            }
-                        }
-                    //}
+                    }
 
                     if (transaction != null)
                     {
@@ -191,20 +183,5 @@ namespace BitcoinLib.Transactions
 
             return result;
         }
-
-
-        //Currently no solution for this one
-        //public async Task<TransactionStatus> GetTransactionStatusesByAddressBitcoinDaemon(string address, int tryCount = 2, int delayMS = 1000)
-        //{
-        //    var client = new NBitcoin.RPC.RPCClient(new RPCCredentialString() { UserPassword = serviceConfiguration.Credentials }, serviceConfiguration.Network);
-
-        //    var addressObject = BitcoinAddress.Create(address, serviceConfiguration.Network);
-
-        //    await client.ImportAddressAsync(addressObject);
-
-        //    var result = await client.GetReceivedByAddressAsync(addressObject, 0);
-
-        //    return TransactionStatus.Created;
-        //}
     }
 }

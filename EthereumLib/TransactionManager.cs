@@ -1,4 +1,5 @@
 ﻿using EthereumLib.Models;
+using Graft.Infrastructure;
 using Graft.Infrastructure.AccountPool;
 using Microsoft.Extensions.Logging;
 using System;
@@ -105,6 +106,9 @@ namespace EthereumLib
 
                 await Task.Delay(delayMS);
             }
+
+            if (result.Address == null)
+                throw new ApiException(ErrorCode.CannotCreateEthAddress);
 
             return result;
         }

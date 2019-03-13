@@ -138,5 +138,8 @@ namespace Graft.Infrastructure
 
         [Description("Currency pair '{0}' is not supported")]
         CurrencyPairNotSupported = 46,
+
+        [Description("Failed to get Ethereum address")]
+        CannotCreateEthAddress = 47,
     }
 }
